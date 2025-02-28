@@ -7,6 +7,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
+# Load the CSS file
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+local_css("styles.css")
+
 # Load the dataset
 def load_data(uploaded_file):
     if uploaded_file is not None:
@@ -48,6 +55,14 @@ def preprocess_data(data):
     # Convert target variable 'Churn' to binary
     data['Churn'] = data['Churn'].apply(lambda x: 1 if x == 'Yes' else 0)
     
+    # Ensure all boolean columns are of type bool
+    for col in data.select_dtypes(include=[np.bool_]).columns:
+        data[col] = data[col].astype(bool)
+    
+    # Ensure all object columns are of type string
+    for col in data.select_dtypes(include=['object']).columns:
+        data[col] = data[col].astype(str)
+    
     return data
 
 # Streamlit App
@@ -65,6 +80,10 @@ if uploaded_file is not None:
         # Display the dataset
         st.write("### Dataset Preview")
         st.write(data.head())
+
+        # Debug: Print column types
+        st.write("### Column Types")
+        st.write(data.dtypes)
 
         # Visualizations
         st.write("### Customer Demographics and Service Usage Patterns")
